@@ -410,7 +410,7 @@ public class DataPanel extends JPanel implements TopEventListener {
         setLayout(new BorderLayout());
         JPanel credPanel = new JPanel(new SpringLayout());
         add(credPanel, BorderLayout.NORTH);
-        JLabel lbAlgo = new JLabel(getString("label.hash"));
+        JLabel lbAlgo = new JLabel(getString("label.hash"), JLabel.RIGHT);
         credPanel.add(lbAlgo);
 
         initAlgos();
@@ -430,14 +430,14 @@ public class DataPanel extends JPanel implements TopEventListener {
             }
         });
 
-        JLabel lbPassMaster = new JLabel(getString("label.pass.master"));
+        JLabel lbPassMaster = new JLabel(getString("label.pass.master"), JLabel.RIGHT);
         credPanel.add(lbPassMaster);
 
         passMaster = new JPasswordField(10);
         credPanel.add(passMaster);
         passMaster.setText(getEnv().getParams().getKm());
 
-        JLabel lbPassData = new JLabel(getString("label.pass.data"));
+        JLabel lbPassData = new JLabel(getString("label.pass.data"), JLabel.RIGHT);
         credPanel.add(lbPassData);
 
         passData = new JPasswordField(10);

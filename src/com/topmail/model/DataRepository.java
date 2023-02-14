@@ -18,6 +18,7 @@ import com.topmail.transfert.out.TableExportFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class DataRepository {
 
@@ -25,17 +26,18 @@ public class DataRepository {
 
     private static final String CHUNK_SETTINGS = "SETTINGS\u00FF";
     private static final String CHUNK_MAILING = "MAILING\u00FF";
+    private static final String CHUNK_SUBJECT = "SUBJECT\u00FF";
     private static final String CHUNK_BODY = "BODY\u00FF";
     private static final String CHUNK_REPORT = "REPORT\u00FF";
 
-    private static final String[] CHUNKS = new String[]{CHUNK_SETTINGS, CHUNK_MAILING, CHUNK_BODY, CHUNK_REPORT};
+    private static final String[] CHUNKS = new String[]{CHUNK_SETTINGS, CHUNK_MAILING, CHUNK_SUBJECT, CHUNK_BODY, CHUNK_REPORT};
 
     HiDataBag bag = new HiDataBag();
     Settings settings = new Settings();
     Table mailingList = new Table();
 
+    String subject = "";
     String body = "";
-
     String report = "";
 
     public DataRepository() {
@@ -48,6 +50,7 @@ public class DataRepository {
 
         loadSettings();
         loadMailingList();
+        loadSubject();
         loadBody();
         loadReport();
 
@@ -89,6 +92,17 @@ public class DataRepository {
         }
     }
 
+    public void loadSubject() {
+        subject = "";
+        try {
+            ChunkData cd = getByName(CHUNK_SUBJECT);
+            if (cd != null) {
+                subject = new String(cd.getData());
+            }
+        } catch (Exception e) {
+        }
+    }
+
 
     public void loadReport() {
         report = "";
@@ -107,6 +121,7 @@ public class DataRepository {
 
         saveSettings();
         saveMailingList();
+        saveSubject();
         saveBody();
         saveReport();
 
@@ -146,6 +161,19 @@ public class DataRepository {
         }
     }
 
+    public void saveSubject() {
+        ChunkData cd = getByName(CHUNK_SUBJECT);
+        if (cd == null) {
+            cd = new ChunkData();
+            cd.setName(CHUNK_SUBJECT);
+            bag.addItem(cd);
+        }
+        try {
+            cd.setData(subject.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+
+        }
+    }
     public void saveBody() {
         ChunkData cd = getByName(CHUNK_BODY);
         if (cd == null) {
@@ -194,6 +222,14 @@ public class DataRepository {
         return mailingList;
     }
 
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
     public String getBody() {
         return body;
     }
@@ -219,4 +255,26 @@ public class DataRepository {
         return true;
     }
 
+    public ArrayList<ChunkData> getAttachments() {
+        ArrayList<ChunkData> lst = new ArrayList<>();
+        for (AbstractChunk c : bag.getItems()) {
+            if (c instanceof ChunkData) {
+                ChunkData cd = (ChunkData) c;
+                if (isAttachement(cd)) {
+                    lst.add(cd);
+                }
+            }
+        }
+        return lst;
+    }
+
+    public ChunkData addAttachment() {
+        ChunkData cd = new ChunkData();
+        bag.addItem(cd);
+        return cd;
+    }
+
+    public void removeAttachment(ChunkData cd) {
+        bag.removeById(cd.getId());
+    }
 }
