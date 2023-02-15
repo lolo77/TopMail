@@ -181,7 +181,9 @@ public class Main extends JFrame implements TopEventListener {
                     Log.setLevel(Log.TRACE);
                 } else if ("-h".equals(arg)) {
                     if (iter.hasNext()) {
-                        env.getCfg().setAlgo(iter.next());
+                        String algo = iter.next();
+                        env.getCfg().setAlgo(algo);
+                        env.getParams().setHashAlgo(algo);
                     }
                 } else if ("-pm".equals(arg)) {
                     if (iter.hasNext()) {

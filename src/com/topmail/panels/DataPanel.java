@@ -487,6 +487,7 @@ public class DataPanel extends JPanel implements TopEventListener {
         progress.setAlignmentX(Component.CENTER_ALIGNMENT);
         progress.setVisible(false);
 
+        buildParams();
     }
 
     @Override

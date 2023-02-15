@@ -30,6 +30,9 @@ public class DataRepository {
     private static final String CHUNK_BODY = "BODY\u00FF";
     private static final String CHUNK_REPORT = "REPORT\u00FF";
 
+    public static final String CHUNK_SECRET = " \u00A0";
+    public static final String MAILING_KEY_EMAIL = "email";
+
     private static final String[] CHUNKS = new String[]{CHUNK_SETTINGS, CHUNK_MAILING, CHUNK_SUBJECT, CHUNK_BODY, CHUNK_REPORT};
 
     HiDataBag bag = new HiDataBag();

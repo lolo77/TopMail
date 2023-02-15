@@ -10,10 +10,10 @@ public class Env {
     private static final Log LOG = new Log(Env.class);
 
 
-    Config cfg = new Config();
-    DataRepository repo = new DataRepository();
+    private Config cfg = new Config();
+    private DataRepository repo = new DataRepository();
 
-    Parameters params = new Parameters();
+    private Parameters params = new Parameters();
 
     private File inputFile = null;
 

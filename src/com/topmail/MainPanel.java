@@ -2,10 +2,7 @@ package com.topmail;
 
 import com.secretlib.util.HiUtils;
 import com.secretlib.util.Log;
-import com.topmail.panels.DataPanel;
-import com.topmail.panels.MailingPanel;
-import com.topmail.panels.MessagePanel;
-import com.topmail.panels.SettingsPanel;
+import com.topmail.panels.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -121,6 +118,12 @@ public class MainPanel extends JPanel {
 
         MailingPanel mailpan = new MailingPanel();
         tabbedPane.add(getString("tab.mailing"), mailpan);
+
+        ReportPanel reportpan = new ReportPanel();
+        tabbedPane.add(getString("tab.report"), reportpan);
+
+        CheckPanel checkpan = new CheckPanel();
+        tabbedPane.add(getString("tab.check"), checkpan);
 
         JButton btnAbout = new JButton(getString("btn.about"));
         add(btnAbout, BorderLayout.SOUTH);
