@@ -7,11 +7,13 @@ import com.secretlib.model.AbstractChunk;
 import com.secretlib.model.ChunkData;
 import com.secretlib.model.HiDataBag;
 import com.secretlib.util.HiUtils;
+import com.secretlib.util.Log;
 import com.secretlib.util.Parameters;
 import com.topmail.Main;
 import com.topmail.exceptions.NoEmailException;
 import com.topmail.exceptions.NoRecipientException;
 import com.topmail.model.DataRepository;
+import com.topmail.model.Env;
 import com.topmail.model.Settings;
 import com.topmail.transfert.data.Table;
 import com.topmail.transfert.data.TableRow;
@@ -29,6 +31,8 @@ import static com.topmail.Main.getEnv;
 import static com.topmail.Main.getString;
 
 public class CheckPanel extends JPanel {
+
+    private static final Log LOG = new Log(CheckPanel.class);
 
     private JTextField txtAttachment;
 

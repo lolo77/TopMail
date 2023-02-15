@@ -2,9 +2,11 @@ package com.topmail.panels;
 
 import com.secretlib.io.stream.HiDataStreamFactory;
 import com.secretlib.model.ChunkData;
+import com.secretlib.util.Log;
 import com.topmail.Main;
 import com.topmail.events.TopEventAttachmentChanged;
 import com.topmail.events.TopEventDispatcher;
+import com.topmail.sender.MailSender;
 import com.topmail.util.Utils;
 
 import javax.swing.*;
@@ -25,6 +27,9 @@ import java.nio.file.Paths;
 import static com.topmail.Main.getEnv;
 
 public class Attachment extends JPanel {
+
+    private static final Log LOG = new Log(Attachment.class);
+
 
     JTextField txtName;
     JTextField txtPath;

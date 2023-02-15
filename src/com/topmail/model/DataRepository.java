@@ -7,9 +7,13 @@ import com.secretlib.util.Log;
 import com.topmail.events.TopEventDataLoaded;
 import com.topmail.events.TopEventDataSaving;
 import com.topmail.events.TopEventDispatcher;
+import com.topmail.exceptions.NoEmailException;
+import com.topmail.exceptions.NoRecipientException;
 import com.topmail.panels.DataPanel;
 import com.topmail.panels.SettingsPanel;
 import com.topmail.transfert.data.Table;
+import com.topmail.transfert.data.TableCell;
+import com.topmail.transfert.data.TableRow;
 import com.topmail.transfert.in.ITableImport;
 import com.topmail.transfert.in.TableImportFactory;
 import com.topmail.transfert.out.ITableExport;
@@ -19,6 +23,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+
+import static com.topmail.Main.getEnv;
 
 public class DataRepository {
 
@@ -279,5 +285,24 @@ public class DataRepository {
 
     public void removeAttachment(ChunkData cd) {
         bag.removeById(cd.getId());
+    }
+
+    public int getEmailFieldIndex() throws NoEmailException, NoRecipientException {
+        Table tbl = mailingList;
+        if (tbl.getRows().size() < 2) {
+            throw new NoRecipientException();
+        }
+        TableRow header = tbl.getRows().get(0);
+        int iCell = 0;
+        while (iCell < header.getCells().size()) {
+            TableCell c = header.getCells().get(iCell);
+            String s = c.getValue();
+            if ((s != null) && (s.equals(DataRepository.MAILING_KEY_EMAIL))) {
+                return iCell;
+            }
+
+            iCell++;
+        }
+        throw new NoEmailException();
     }
 }

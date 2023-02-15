@@ -6,6 +6,8 @@ import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 import static com.topmail.Main.getEnv;
 
@@ -44,10 +46,14 @@ public class MessagePanel extends JPanel implements TopEventListener {
         return editor.getText();
     }
 
+    public void updateEnv() {
+        getEnv().getRepo().setBody(editor.getText());
+    }
+
     @Override
     public void processTopEvent(TopEventBase e) {
         if (e instanceof TopEventDataSaving) {
-            getEnv().getRepo().setBody(editor.getText());
+            updateEnv();
         }
         if (e instanceof TopEventDataLoaded) {
             editor.setText(getEnv().getRepo().getBody());
