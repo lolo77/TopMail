@@ -147,9 +147,7 @@ public class Attachment extends JPanel {
         if (f.exists() && f.isFile()) {
             filePath = f.getAbsolutePath();
             txtPath.setText(filePath);
-            if ((cd.getName() == null) || (cd.getName().length() == 0)) {
-                updateName(f.getName());
-            }
+            updateName(f.getName());
             updateSize(Files.size(Paths.get(filePath)));
             String ext = Utils.getFileExt(f);
             boolean bExtOk = (HiDataStreamFactory.isSupportedInputExtension(ext)

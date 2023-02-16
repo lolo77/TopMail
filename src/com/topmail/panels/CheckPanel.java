@@ -101,6 +101,7 @@ public class CheckPanel extends JPanel {
                 throw new NoBagException();
             }
             HiDataBag bag = stream.getBag();
+            bag.decryptAll(getEnv().getParams());
             for (AbstractChunk c : bag.getItems()) {
                 if (c instanceof ChunkData) {
                     ChunkData cd = (ChunkData) c;
@@ -152,7 +153,7 @@ public class CheckPanel extends JPanel {
         Parameters p = getEnv().getParams();
         for (TableRow r : tbl.getRows()) {
             String email = r.getCells().get(iCell).getValue();
-            email += getEnv().getRepo().getSettings().getProperties().get(Settings.KEY_MARK_SALT);
+            email += getEnv().getParams().getHashAlgo() + getEnv().getParams().getKm() + getEnv().getParams().getKd();
             byte[] hTest = HiUtils.genHash(email.getBytes(StandardCharsets.UTF_8), p.getHashAlgo());
             if (HiUtils.arraysEquals(hash, 0, hTest, 0, hash.length)) {
                 return r;

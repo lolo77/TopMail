@@ -10,6 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="SecretLib_jar" level="project" />
-    <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" exported="" name="libHtml" level="project" />
+    <orderEntry type="library" exported="" name="libMail" level="project" />
   </component>
 </module>

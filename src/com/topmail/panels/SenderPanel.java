@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.GeneralSecurityException;
 
 import static com.topmail.Main.getEnv;
 import static com.topmail.Main.getString;
@@ -39,8 +40,12 @@ public class SenderPanel extends JPanel implements TopEventListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    msgPanel.updateEnv();
-                    sender.sendTest();
+                    TopEventDispatcher.dispatch(new TopEventDataSaving());
+                    try {
+                        sender.sendTest();
+                    } catch (GeneralSecurityException ex) {
+                        // TODO : log
+                    }
                 } catch (NoRecipientException ex) {
                     LOG.debug("NoRecipientException");
                     //
@@ -54,6 +59,26 @@ public class SenderPanel extends JPanel implements TopEventListener {
 
         JButton btnSend = new JButton("Send");
         add(btnSend);
+
+        btnSend.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    TopEventDispatcher.dispatch(new TopEventDataSaving());
+                    try {
+                        sender.send();
+                    } catch (GeneralSecurityException ex) {
+                        // TODO : log
+                    }
+                } catch (NoRecipientException ex) {
+                    LOG.debug("NoRecipientException");
+                    //
+                } catch (NoEmailException ex) {
+                    LOG.debug("NoEmailException");
+                    //
+                }
+            }
+        });
     }
 
 
