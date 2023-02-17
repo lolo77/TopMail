@@ -1,5 +1,6 @@
 package com.topmail.sender;
 
+import com.secretlib.exception.HiDataEncoderException;
 import com.secretlib.io.stream.HiDataAbstractOutputStream;
 import com.secretlib.io.stream.HiDataStreamFactory;
 import com.secretlib.model.ChunkData;
@@ -27,8 +28,6 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -66,8 +65,11 @@ public class MailSender {
 
     public static Placeholder[] PLACEHOLDERS = {P_DATE};
 
-    public MailSender() {
+    private SenderState state;
 
+
+    public MailSender(SenderState state) {
+        this.state = state;
     }
 
     private TableRow getTestRow() throws NoEmailException, NoRecipientException {
@@ -87,7 +89,7 @@ public class MailSender {
         return null;
     }
 
-    public void sendTest() throws NoRecipientException, NoEmailException, GeneralSecurityException {
+    public void sendTest() throws NoRecipientException, NoEmailException, GeneralSecurityException, MessagingException, IOException {
         TableRow r = getTestRow();
         if (r != null) {
             sendTo(r);
@@ -97,7 +99,7 @@ public class MailSender {
     }
 
 
-    public void send() throws NoRecipientException, NoEmailException, GeneralSecurityException {
+    public void send() throws NoRecipientException, NoEmailException, GeneralSecurityException, MessagingException, IOException {
         String testEmail = getEnv().getRepo().getSettings().getProperties().getProperty(Settings.KEY_EMAIL_TEST);
         if ((testEmail == null) || (testEmail.length() == 0)) {
             throw new NoEmailException();
@@ -107,6 +109,9 @@ public class MailSender {
         Iterator<TableRow> iter = tbl.getRows().iterator();
         iter.next(); // skip header
         while (iter.hasNext()) {
+            if (state.isInterruptionRequested()) {
+                break;
+            }
             TableRow r = iter.next();
             String email = r.getCells().get(idxEmail).getValue();
             if ((email != null) && (!email.equals(testEmail))) {
@@ -116,7 +121,7 @@ public class MailSender {
     }
 
 
-    public void sendTo(TableRow r) throws NoRecipientException, NoEmailException, GeneralSecurityException {
+    public void sendTo(TableRow r) throws NoRecipientException, NoEmailException, GeneralSecurityException, IOException, MessagingException {
         int idxEmail = getEnv().getRepo().getEmailFieldIndex();
 
         Properties settings = getEnv().getRepo().getSettings().getProperties();
@@ -135,10 +140,10 @@ public class MailSender {
 
 
         String subject = getTransformedSubject(r);
-        LOG.debug("Transformed Subject : " + subject);
+//        LOG.debug("Transformed Subject : " + subject);
 
         String body = getTransformedBody(r);
-        LOG.debug("Transformed Body : " + body);
+//        LOG.debug("Transformed Body : " + body);
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -150,102 +155,90 @@ public class MailSender {
         Session session = Session.getInstance(props,
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        String user = (String)settings.get(Settings.KEY_SMTP_USER);
-                        String pwd = (String)settings.get(Settings.KEY_SMTP_PASS);
+                        String user = (String) settings.get(Settings.KEY_SMTP_USER);
+                        String pwd = (String) settings.get(Settings.KEY_SMTP_PASS);
                         return new PasswordAuthentication(user, pwd);
                     }
                 });
 
-        try {
-            // Create a default MimeMessage object.
-            Message message = new MimeMessage(session);
+        // Create a default MimeMessage object.
+        Message message = new MimeMessage(session);
 
-            String from = settings.getProperty(Settings.KEY_EMAIL_FROM);
-            // Set From: header field of the header.
-            message.setFrom(new InternetAddress(from));
+        String from = settings.getProperty(Settings.KEY_EMAIL_FROM);
+        // Set From: header field of the header.
+        message.setFrom(new InternetAddress(from));
 
-            // Set To: header field of the header.
-            message.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(to));
+        // Set To: header field of the header.
+        message.setRecipients(Message.RecipientType.TO,
+                InternetAddress.parse(to));
 
-            // Set Subject: header field
-            message.setSubject(subject);
+        // Set Subject: header field
+        message.setSubject(subject);
 
-            // Create the message part
-            BodyPart messageBodyPart = new MimeBodyPart();
+        // Create the message part
+        BodyPart messageBodyPart = new MimeBodyPart();
 
-            // Now set the actual message
-            messageBodyPart.setContent(body, "text/html");
+        // Now set the actual message
+        messageBodyPart.setContent(body, "text/html");
 
-            // Create a multipar message
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(messageBodyPart);
+        // Create a multipar message
+        Multipart multipart = new MimeMultipart();
+        multipart.addBodyPart(messageBodyPart);
 
-            // Part two is attachment
-            List<ChunkData> lst = getEnv().getRepo().getAttachments();
-            for (ChunkData cd : lst) {
-                String filepath = new String(cd.getData(), StandardCharsets.UTF_8);
-                String filename = cd.getName();
-                File f = new File(filepath);
-                if ((f.exists()) && (f.isFile())) {
-                    FileInputStream fis = null;
-                    try {
-                        fis = new FileInputStream(filepath);
-                    } catch (FileNotFoundException e) {
-                        continue;
-                    }
-                    MimeBodyPart attach = new MimeBodyPart();
-
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    HiDataAbstractOutputStream hdo = null;
-                    try {
-                        hdo = HiDataStreamFactory.createOutputStream(fis, out, getEnv().getParams(), HiUtils.getFileExt(f));
-                    } catch (Exception e) {
-                        // TODO : log
-                        continue;
-                    }
-                    DataSource source = null;
-                    if (hdo != null) {
-                        try {
-                            // Write the encrypted marker
-                            hdo.write(secretBytes);
-                            hdo.close();
-                        } catch (IOException e) {
-                            // TODO : log
-                            continue;
-                        }
-                        byte[] data = out.toByteArray();
-                        try {
-                            String type = FileTypeMap.getDefaultFileTypeMap().getContentType(f);
-                            source = new ByteArrayDataSource(new ByteArrayInputStream(data), type);
-                        } catch (IOException e) {
-                            // TODO : log
-                            continue;
-                        }
-                    } else {
-                        // No encrypted marker
-                        source = new FileDataSource(f);
-                    }
-                    attach.setDataHandler(new DataHandler(source));
-                    attach.setFileName(filename);
-                    multipart.addBodyPart(attach);
-                } else {
-                    LOG.info("File ignored (" + filename + ") : " + filepath);
+        // Part two is attachment
+        List<ChunkData> lst = getEnv().getRepo().getAttachments();
+        for (ChunkData cd : lst) {
+            String filepath = new String(cd.getData(), StandardCharsets.UTF_8);
+            String filename = cd.getName();
+            File f = new File(filepath);
+            if ((f.exists()) && (f.isFile())) {
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(filepath);
+                } catch (FileNotFoundException e) {
+                    continue;
                 }
+                MimeBodyPart attach = new MimeBodyPart();
+
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                HiDataAbstractOutputStream hdo = null;
+                try {
+                    hdo = HiDataStreamFactory.createOutputStream(fis, out, getEnv().getParams(), HiUtils.getFileExt(f));
+                } catch (Exception e) {
+                    throw new HiDataEncoderException(e);
+                }
+                DataSource source = null;
+                if (hdo != null) {
+                    try {
+                        // Write the encrypted marker
+                        hdo.write(secretBytes);
+                        hdo.close();
+                    } catch (IOException e) {
+                        throw new HiDataEncoderException(e);
+                    }
+                    byte[] data = out.toByteArray();
+                    String type = FileTypeMap.getDefaultFileTypeMap().getContentType(f);
+                    source = new ByteArrayDataSource(new ByteArrayInputStream(data), type);
+                } else {
+                    // No encrypted marker
+                    source = new FileDataSource(f);
+                }
+                attach.setDataHandler(new DataHandler(source));
+                attach.setFileName(filename);
+                multipart.addBodyPart(attach);
+            } else {
+                LOG.info("File ignored (" + filename + ") : " + filepath);
             }
-
-            // Send the complete message parts
-            message.setContent(multipart);
-
-            // Send message
-            Transport.send(message);
-
-            LOG.debug("Sent message successfully....");
-
-        } catch (MessagingException e) {
-            LOG.debug("Error : " + e.getMessage());
-            throw new RuntimeException(e);
         }
+
+        // Send the complete message parts
+        message.setContent(multipart);
+
+        // Send message
+        Transport.send(message);
+
+        // Add counter
+        state.setNbSent(state.getNbSent() + 1);
     }
 
     private String getTransformedSubject(TableRow r) throws NoRecipientException {
