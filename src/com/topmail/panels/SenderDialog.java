@@ -1,6 +1,8 @@
 package com.topmail.panels;
 
 import com.secretlib.util.Log;
+import com.topmail.events.TopEventDispatcher;
+import com.topmail.events.TopEventReportChanged;
 import com.topmail.exceptions.NoEmailException;
 import com.topmail.sender.MailSender;
 import com.topmail.sender.SenderState;
@@ -89,7 +91,6 @@ public class SenderDialog extends JDialog {
                 }
                 lblStatus.setText(msg);
                 btnCancel.setText(getString("btn.sender.close"));
-
             } else if (state.isRunning()) {
                 String msg = getString("lbl.sender.progress", String.valueOf(state.getNbSent()), String.valueOf(nbEmails));
                 lblStatus.setText(msg);
@@ -118,13 +119,16 @@ public class SenderDialog extends JDialog {
                 while ((!state.isInterruptionRequested()) && (!state.isEnded())) {
                     try {
                         Thread.sleep(1000);
-                        LOG.debug("Thread running : " + state.getNbSent());
+//                        LOG.debug("Thread running : " + state.getNbSent());
                         panel.updateState(state);
                     } catch (InterruptedException e) {
                         // NO op
                     }
                 }
                 panel.updateState(state);
+                if (state.isEnded()) {
+                    TopEventDispatcher.dispatch(new TopEventReportChanged(state));
+                }
                 LOG.debug("Thread terminated");
             }
         });

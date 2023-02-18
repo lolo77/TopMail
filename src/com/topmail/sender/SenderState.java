@@ -1,11 +1,28 @@
 package com.topmail.sender;
 
+import java.util.HashMap;
+
 public class SenderState {
+
+
+    public static class EmailState {
+        private Exception cause;
+
+        public EmailState(Exception cause) {
+            this.cause = cause;
+        }
+
+        public Exception getCause() {
+            return cause;
+        }
+    }
 
     private boolean running;
     private boolean ended;
     private boolean interruptionRequested;
     private int nbSent;
+
+    private HashMap<String, EmailState> hmReport;
 
     private Exception exception;
 
@@ -15,6 +32,7 @@ public class SenderState {
         interruptionRequested = false;
         nbSent = 0;
         exception = null;
+        hmReport = new HashMap<>();
     }
 
     public boolean isRunning() {
@@ -47,6 +65,10 @@ public class SenderState {
 
     public void setNbSent(int nbSent) {
         this.nbSent = nbSent;
+    }
+
+    public HashMap<String, EmailState> getHmReport() {
+        return hmReport;
     }
 
     public Exception getException() {

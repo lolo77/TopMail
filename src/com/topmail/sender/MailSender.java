@@ -92,7 +92,15 @@ public class MailSender {
     public void sendTest() throws NoRecipientException, NoEmailException, GeneralSecurityException, MessagingException, IOException {
         TableRow r = getTestRow();
         if (r != null) {
-            sendTo(r);
+            int idxEmail = getEnv().getRepo().getEmailFieldIndex();
+            String email = r.getCells().get(idxEmail).getValue();
+            try {
+                sendTo(r);
+                state.getHmReport().put(email, new SenderState.EmailState(null));
+            } catch (Exception e) {
+                state.getHmReport().put(email, new SenderState.EmailState(e));
+                throw e;
+            }
         } else {
             throw new NoRecipientException();
         }
@@ -115,7 +123,13 @@ public class MailSender {
             TableRow r = iter.next();
             String email = r.getCells().get(idxEmail).getValue();
             if ((email != null) && (!email.equals(testEmail))) {
-                sendTo(r);
+                try {
+                    sendTo(r);
+                    state.getHmReport().put(email, new SenderState.EmailState(null));
+                } catch (Exception e) {
+                    state.getHmReport().put(email, new SenderState.EmailState(e));
+                    throw e;
+                }
             }
         }
     }

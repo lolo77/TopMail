@@ -113,11 +113,11 @@ public class MainPanel extends JPanel {
         SettingsPanel settingsPanel = new SettingsPanel();
         tabbedPane.add(getString("tab.settings"), settingsPanel);
 
-        MessagePanel msgpan = new MessagePanel();
-        tabbedPane.add(getString("tab.message"), msgpan);
-
         MailingPanel mailpan = new MailingPanel();
         tabbedPane.add(getString("tab.mailing"), mailpan);
+
+        MessagePanel msgpan = new MessagePanel();
+        tabbedPane.add(getString("tab.message"), msgpan);
 
         ReportPanel reportpan = new ReportPanel();
         tabbedPane.add(getString("tab.report"), reportpan);
