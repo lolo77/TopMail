@@ -59,8 +59,8 @@ public class ReportPanel extends JPanel implements TopEventListener {
                 cause = ex.getMessage();
                 if ((cause == null) || (cause.length() == 0)) {
                     cause = getString("lbl.sender.exception." + ex.getClass().getSimpleName(), ex.getMessage());
-                    if ((cause == null) || (cause.length() == 0)) {
-                        cause = Main.getString("lbl.sender.exception.MessagingException");
+                    if ((cause == null) || (cause.length() == 0) || (cause.startsWith("[key"))) {
+                        cause = Main.getString("lbl.sender.exception.Exception", ex.getMessage());
                     }
                 }
             }

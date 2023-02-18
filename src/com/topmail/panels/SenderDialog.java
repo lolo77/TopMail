@@ -88,6 +88,9 @@ public class SenderDialog extends JDialog {
                 if (state.getException() != null) {
                     Exception e = state.getException();
                     msg = getString("lbl.sender.exception." + e.getClass().getSimpleName(), e.getMessage());
+                    if (msg.startsWith("[key")) {
+                        msg = getString("lbl.sender.exception.Exception", e.getMessage());
+                    }
                 }
                 lblStatus.setText(msg);
                 btnCancel.setText(getString("btn.sender.close"));

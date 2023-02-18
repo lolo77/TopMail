@@ -70,6 +70,7 @@ public class CheckPanel extends JPanel {
         txtResult.setEditable(false);
         txtResult.setEditable(true);
         add(txtResult);
+
     }
 
 
@@ -93,6 +94,7 @@ public class CheckPanel extends JPanel {
     private void check(File f) {
         txtAttachment.setText(f.getName());
         txtResult.setText("");
+
         boolean bFound = false;
         try {
             InputStream is = new FileInputStream(f);

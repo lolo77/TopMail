@@ -10,6 +10,7 @@ import com.secretlib.util.Log;
 import com.topmail.Main;
 import com.topmail.exceptions.NoEmailException;
 import com.topmail.exceptions.NoRecipientException;
+import com.topmail.exceptions.NoTestEmailException;
 import com.topmail.model.DataRepository;
 import com.topmail.model.Settings;
 import com.topmail.transfert.data.Table;
@@ -72,10 +73,10 @@ public class MailSender {
         this.state = state;
     }
 
-    private TableRow getTestRow() throws NoEmailException, NoRecipientException {
+    private TableRow getTestRow() throws NoEmailException, NoRecipientException, NoTestEmailException {
         String testEmail = getEnv().getRepo().getSettings().getProperties().getProperty(Settings.KEY_EMAIL_TEST);
         if ((testEmail == null) || (testEmail.length() == 0)) {
-            throw new NoEmailException();
+            throw new NoTestEmailException();
         }
         int idxEmail = getEnv().getRepo().getEmailFieldIndex();
         Table tbl = getEnv().getRepo().getMailingList();
@@ -89,7 +90,7 @@ public class MailSender {
         return null;
     }
 
-    public void sendTest() throws NoRecipientException, NoEmailException, GeneralSecurityException, MessagingException, IOException {
+    public void sendTest() throws NoRecipientException, NoEmailException, GeneralSecurityException, MessagingException, IOException, NoTestEmailException {
         TableRow r = getTestRow();
         if (r != null) {
             int idxEmail = getEnv().getRepo().getEmailFieldIndex();
@@ -107,10 +108,10 @@ public class MailSender {
     }
 
 
-    public void send() throws NoRecipientException, NoEmailException, GeneralSecurityException, MessagingException, IOException {
+    public void send() throws NoRecipientException, NoEmailException, GeneralSecurityException, MessagingException, IOException, NoTestEmailException {
         String testEmail = getEnv().getRepo().getSettings().getProperties().getProperty(Settings.KEY_EMAIL_TEST);
         if ((testEmail == null) || (testEmail.length() == 0)) {
-            throw new NoEmailException();
+            throw new NoTestEmailException();
         }
         int idxEmail = getEnv().getRepo().getEmailFieldIndex();
         Table tbl = getEnv().getRepo().getMailingList();
@@ -249,7 +250,7 @@ public class MailSender {
         message.setContent(multipart);
 
         // Send message
-        Transport.send(message);
+//        Transport.send(message);
 
         // Add counter
         state.setNbSent(state.getNbSent() + 1);
