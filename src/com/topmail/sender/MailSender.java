@@ -250,7 +250,7 @@ public class MailSender {
         message.setContent(multipart);
 
         // Send message
-//        Transport.send(message);
+        Transport.send(message);
 
         // Add counter
         state.setNbSent(state.getNbSent() + 1);

@@ -31,7 +31,7 @@ public class Main extends JFrame implements TopEventListener {
 
     private static final Log LOG = new Log(Main.class);
 
-    public static final String VERSION = "0.0.1";
+    public static final String VERSION = "1.0.0";
 
     private static ResourceBundle bundle;
     private static Env env = new Env();
