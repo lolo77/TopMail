@@ -218,7 +218,7 @@ public class MailSender {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 HiDataAbstractOutputStream hdo = null;
                 try {
-                    hdo = HiDataStreamFactory.createOutputStream(fis, out, getEnv().getParams(), HiUtils.getFileExt(f));
+                    hdo = HiDataStreamFactory.createOutputStream(fis, out, getEnv().getParams());
                 } catch (Exception e) {
                     throw new HiDataEncoderException(e);
                 }

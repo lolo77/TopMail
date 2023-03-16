@@ -80,19 +80,6 @@ public class DataPanel extends JPanel implements TopEventListener {
     }
 
 
-    public int getSpaceCapacity() {
-        int cap = 0;
-        int[] spaceCapacity = getEnv().getSpaceCapacity();
-        for (int i = 0; i <= 7; i++) {
-            if (spaceCapacity[i] == Integer.MAX_VALUE) {
-                return Integer.MAX_VALUE;
-            }
-            cap += spaceCapacity[i];
-        }
-        return cap;
-    }
-
-
     public DataPanel() {
         TopEventDispatcher.addListener(this);
         Arrays.fill(getEnv().getSpaceCapacity(), 0);
@@ -142,6 +129,7 @@ public class DataPanel extends JPanel implements TopEventListener {
             if (hdis == null)
                 throw new Exception(getString("input.err.file.format", file.getName()));
             HiDataBag newBag = hdis.getBag();
+            p.setCodec(hdis.getOutputCodecName());
             if (!newBag.isEmpty()) {
                 // Replace the displayed bag by the one found in the source image
                 if (newBag.verifyHash()) {
@@ -373,7 +361,7 @@ public class DataPanel extends JPanel implements TopEventListener {
                         // in and out must not be the same file or the input file would be squizzed (length set to 0).
                         FileInputStream fis = new FileInputStream(fTemp);
                         FileOutputStream fos = new FileOutputStream(outputFile);
-                        HiDataAbstractOutputStream out = HiDataStreamFactory.createOutputStream(fis, fos, p, sExt);
+                        HiDataAbstractOutputStream out = HiDataStreamFactory.createOutputStream(fis, fos, p);
                         if (out == null)
                             throw new Exception(getString("encoder.error.ext", sExt));
                         HiDataBag bag = getEnv().getRepo().save();
